@@ -13,5 +13,10 @@ namespace RTSTemplate.Data
         public Vector2Int FootprintSize = Vector2Int.one;
 
         public int MaxHealth = 200;
+
+        [Header("Construction")]
+        public ResourceCost[] Costs = new ResourceCost[0];
+        public int ConstructionTimeTicks = 100;
+        public bool AcceptsResourceDeposits = true;
     }
 }

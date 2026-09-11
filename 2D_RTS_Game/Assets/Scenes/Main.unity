@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420033}
   - component: {fileID: 519420034}
+  - component: {fileID: 519420035}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -324,6 +325,7 @@ MonoBehaviour:
   renderer: {fileID: 1656319163}
   simulationManager: {fileID: 900000003}
   unitSpawner: {fileID: 900000009}
+  economyBootstrap: {fileID: 900000012}
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +340,74 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   cam: {fileID: 519420031}
   simulationManager: {fileID: 900000003}
+  economy: {fileID: 900000012}
   clickTolerance: 0.5
+--- !u!114 &519420035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8123d814b02e49ed929c1e39b7ff6917, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  cam: {fileID: 519420031}
+  simulationManager: {fileID: 900000003}
+  buildableDefinition: {fileID: 11400000, guid: c129197a53454a68b65348b1d3b5a11e, type: 2}
+--- !u!1 &900000010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 900000011}
+  - component: {fileID: 900000012}
+  m_Layer: 0
+  m_Name: EconomyBootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &900000011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900000010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &900000012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900000010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fd2b8a52f9f4aa09abe9f32df389653, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  simulationManager: {fileID: 900000003}
+  townHallDefinition: {fileID: 11400000, guid: a51ac0e7418d4e3892b42cc2e0aefa7b, type: 2}
+  townHallOrigin: {x: 2, y: 2}
+  goldNodePosition: {x: 2, y: 6}
+  goldNodeAmount: 500
+  woodNodePosition: {x: 16, y: 2}
+  woodNodeAmount: 500
 --- !u!1 &900000007
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,3 +652,4 @@ SceneRoots:
   - {fileID: 900000005}
   - {fileID: 1545919479}
   - {fileID: 900000008}
+  - {fileID: 900000011}

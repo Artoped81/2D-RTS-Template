@@ -14,5 +14,10 @@ namespace RTSTemplate.Data
 
         public int MaxHealth = 50;
         public WeaponDefinition Weapon;
+
+        [Header("Gathering")]
+        public bool CanGather;
+        public int CarryCapacity = 10;
+        public float GatherTimePerLoad = 2f;
     }
 }

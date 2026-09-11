@@ -11,6 +11,7 @@ namespace RTSTemplate.Simulation
         [SerializeField] private TerrainMapRenderer renderer;
         [SerializeField] private SimulationManager simulationManager;
         [SerializeField] private UnitSpawner unitSpawner;
+        [SerializeField] private EconomyBootstrap economyBootstrap;
 
         public TerrainMap Map { get; private set; }
 
@@ -20,6 +21,7 @@ namespace RTSTemplate.Simulation
             CarveTestLake();
             renderer.Render(Map);
             simulationManager.ActiveMap = Map;
+            economyBootstrap.Setup(Map);
             unitSpawner.SpawnInitialUnits(Map);
         }
 

@@ -29,6 +29,12 @@ namespace RTSTemplate.Simulation
             cells[x, y].Domain = domain;
         }
 
+        public void SetOccupied(int x, int y, bool occupied)
+        {
+            if (!IsInBounds(x, y)) return;
+            cells[x, y].Occupied = occupied;
+        }
+
         public bool IsPassable(MovementDomain travelerDomain, int x, int y)
         {
             if (!IsInBounds(x, y) || cells[x, y].Occupied) return false;

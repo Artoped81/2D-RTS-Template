@@ -9,16 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48a4f7aeb0497c84184088ed88a752f7, type: 3}
-  m_Name: PlaceholderInfantry
+  m_Script: {fileID: 11500000, guid: 096cfb7c291c79b4ab06d7e0b5ee3905, type: 3}
+  m_Name: TownHall
   m_EditorClassIdentifier:
-  DisplayName: Infantry
+  DisplayName: Town Hall
   PlaceholderSprite: {fileID: 0}
   Domain: 0
-  MoveSpeed: 2
-  MaxHealth: 50
-  Weapon: {fileID: 0}
-  CanGather: 1
-  CarryCapacity: 10
-  GatherTimePerLoad: 2
-
+  FootprintSize: {x: 2, y: 2}
+  MaxHealth: 500
+  Costs: []
+  ConstructionTimeTicks: 100
+  AcceptsResourceDeposits: 1

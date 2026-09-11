@@ -21,7 +21,10 @@ namespace RTSTemplate.Simulation
                 {
                     if (!map.IsPassable(testUnitDefinition.Domain, x, y)) continue;
 
-                    var unit = new Unit(testUnitDefinition, new Vector2Int(x, y));
+                    var unit = new Unit(testUnitDefinition, new Vector2Int(x, y))
+                    {
+                        Owner = simulationManager.PlayerFaction
+                    };
                     simulationManager.Units.Add(unit);
                     SpawnView(unit);
                     spawned++;

@@ -9,6 +9,7 @@ namespace RTSTemplate.Rendering
     {
         [SerializeField] private Camera cam;
         [SerializeField] private SimulationManager simulationManager;
+        [SerializeField] private EconomyBootstrap economy;
         [SerializeField] private float clickTolerance = 0.5f;
 
         private readonly List<UnitView> selected = new List<UnitView>();
@@ -107,6 +108,7 @@ namespace RTSTemplate.Rendering
 
             var worldTarget = cam.ScreenToWorldPoint(screenPos);
             var targetCell = new Vector2Int(Mathf.FloorToInt(worldTarget.x), Mathf.FloorToInt(worldTarget.y));
+            var targetNode = economy != null ? economy.FindNodeAt(targetCell) : null;
 
             var centroid = Vector2.zero;
             foreach (var view in selected) centroid += (Vector2)view.transform.position;
@@ -114,6 +116,16 @@ namespace RTSTemplate.Rendering
 
             foreach (var view in selected)
             {
+                if (targetNode != null && view.Unit.Definition.CanGather)
+                {
+                    var dropOff = simulationManager.FindNearestDropOff(view.Unit.Owner, view.Unit.GridPosition);
+                    if (dropOff != null)
+                    {
+                        view.Unit.StartGathering(simulationManager.ActiveMap, targetNode, dropOff);
+                        continue;
+                    }
+                }
+
                 var offset = (Vector2)view.transform.position - centroid;
                 var unitTarget = targetCell + new Vector2Int(Mathf.RoundToInt(offset.x), Mathf.RoundToInt(offset.y));
                 view.Unit.MoveTo(simulationManager.ActiveMap, unitTarget);
