@@ -121,14 +121,14 @@ namespace RTSTemplate.Rendering
                     var dropOff = simulationManager.FindNearestDropOff(view.Unit.Owner, view.Unit.GridPosition);
                     if (dropOff != null)
                     {
-                        view.Unit.StartGathering(simulationManager.ActiveMap, targetNode, dropOff);
+                        view.Unit.StartGathering(simulationManager.ActiveMap, simulationManager, targetNode, dropOff);
                         continue;
                     }
                 }
 
                 var offset = (Vector2)view.transform.position - centroid;
                 var unitTarget = targetCell + new Vector2Int(Mathf.RoundToInt(offset.x), Mathf.RoundToInt(offset.y));
-                view.Unit.MoveTo(simulationManager.ActiveMap, unitTarget);
+                view.Unit.MoveTo(simulationManager.ActiveMap, simulationManager, unitTarget);
             }
         }
 

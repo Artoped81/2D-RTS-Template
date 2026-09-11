@@ -38,44 +38,47 @@ namespace RTSTemplate.Simulation
             GridPosition = startCell;
         }
 
-        public void MoveTo(TerrainMap map, Vector2Int targetCell)
+        public void MoveTo(TerrainMap map, SimulationManager sim, Vector2Int targetCell)
         {
             gatherPhase = GatherPhase.None;
-            var found = GridPathfinder.FindPath(map, Definition.Domain, GridPosition, targetCell);
-            path = found != null ? new Queue<Vector2Int>(found) : null;
-            moveProgress = 0f;
+            MoveToInternal(map, sim, targetCell);
         }
 
-        public void StartGathering(TerrainMap map, ResourceNode node, Building dropOffBuilding)
+        public void StartGathering(TerrainMap map, SimulationManager sim, ResourceNode node, Building dropOffBuilding)
         {
             gatherNode = node;
             dropOff = dropOffBuilding;
             gatherPhase = GatherPhase.ToNode;
-            MoveToInternal(map, node.Position);
+            MoveTowardNode(map, sim);
         }
 
-        public void TickMove(TerrainMap map, float tickDeltaTime)
+        public void TickMove(TerrainMap map, SimulationManager sim, float tickDeltaTime)
         {
             if (path == null || path.Count == 0) return;
 
-            moveProgress += Definition.MoveSpeed * tickDeltaTime;
+            float speed = Definition.MoveSpeed * (Owner?.MoveSpeedMultiplier ?? 1f);
+            moveProgress += speed * tickDeltaTime;
             while (moveProgress >= 1f && path.Count > 0)
             {
                 var next = path.Peek();
-                if (!map.IsPassable(Definition.Domain, next.x, next.y))
+                if (!map.IsPassable(Definition.Domain, next.x, next.y) ||
+                    (sim != null && sim.IsCellOccupiedByUnit(next)))
                 {
                     path = null;
                     moveProgress = 0f;
                     return;
                 }
 
+                var previous = GridPosition;
                 path.Dequeue();
                 GridPosition = next;
                 moveProgress -= 1f;
+
+                sim?.NotifyUnitMoved(this, previous, next);
             }
         }
 
-        public void TickGather(TerrainMap map, float tickDeltaTime)
+        public void TickGather(TerrainMap map, SimulationManager sim, float tickDeltaTime)
         {
             switch (gatherPhase)
             {
@@ -83,10 +86,15 @@ namespace RTSTemplate.Simulation
                     return;
 
                 case GatherPhase.ToNode:
-                    if (!IsMoving && GridPosition == gatherNode.Position)
+                    if (IsMoving) break;
+                    if (IsAdjacentTo(gatherNode.Position))
                     {
                         gatherPhase = GatherPhase.Harvesting;
                         gatherProgress = 0f;
+                    }
+                    else
+                    {
+                        MoveTowardNode(map, sim);
                     }
                     break;
 
@@ -97,12 +105,13 @@ namespace RTSTemplate.Simulation
                         carriedAmount = gatherNode.Harvest(Definition.CarryCapacity);
                         carriedType = gatherNode.Type;
                         gatherPhase = GatherPhase.ToDropoff;
-                        MoveToInternal(map, dropOff.EntrancePosition);
+                        MoveTowardDropoff(map, sim);
                     }
                     break;
 
                 case GatherPhase.ToDropoff:
-                    if (!IsMoving && GridPosition == dropOff.EntrancePosition)
+                    if (IsMoving) break;
+                    if (IsAdjacentToBuilding(dropOff))
                     {
                         Owner?.Add(carriedType, carriedAmount);
                         carriedAmount = 0;
@@ -110,20 +119,50 @@ namespace RTSTemplate.Simulation
                         if (gatherNode.AmountRemaining > 0)
                         {
                             gatherPhase = GatherPhase.ToNode;
-                            MoveToInternal(map, gatherNode.Position);
+                            MoveTowardNode(map, sim);
                         }
                         else
                         {
                             gatherPhase = GatherPhase.None;
                         }
                     }
+                    else
+                    {
+                        MoveTowardDropoff(map, sim);
+                    }
                     break;
             }
         }
 
-        private void MoveToInternal(TerrainMap map, Vector2Int targetCell)
+        private void MoveTowardNode(TerrainMap map, SimulationManager sim)
         {
-            var found = GridPathfinder.FindPath(map, Definition.Domain, GridPosition, targetCell);
+            var candidates = AdjacencyUtil.GetPerimeterCells(gatherNode.Position, Vector2Int.one);
+            var cell = AdjacencyUtil.FindFreeCell(candidates, map, Definition.Domain, sim, GridPosition);
+            if (cell.HasValue) MoveToInternal(map, sim, cell.Value);
+        }
+
+        private void MoveTowardDropoff(TerrainMap map, SimulationManager sim)
+        {
+            var cell = AdjacencyUtil.FindFreeCell(dropOff.GetAdjacentCells(), map, Definition.Domain, sim, GridPosition);
+            if (cell.HasValue) MoveToInternal(map, sim, cell.Value);
+        }
+
+        private bool IsAdjacentTo(Vector2Int cell)
+        {
+            return Mathf.Abs(GridPosition.x - cell.x) <= 1 && Mathf.Abs(GridPosition.y - cell.y) <= 1;
+        }
+
+        private bool IsAdjacentToBuilding(Building building)
+        {
+            foreach (var cell in building.GetAdjacentCells())
+                if (GridPosition == cell)
+                    return true;
+            return false;
+        }
+
+        private void MoveToInternal(TerrainMap map, SimulationManager sim, Vector2Int targetCell)
+        {
+            var found = GridPathfinder.FindPath(map, Definition.Domain, GridPosition, targetCell, sim);
             path = found != null ? new Queue<Vector2Int>(found) : null;
             moveProgress = 0f;
         }

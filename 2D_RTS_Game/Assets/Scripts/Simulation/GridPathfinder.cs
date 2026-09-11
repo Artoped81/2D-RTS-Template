@@ -14,7 +14,7 @@ namespace RTSTemplate.Simulation
             new Vector2Int(-1, 1), new Vector2Int(-1, -1)
         };
 
-        public static List<Vector2Int> FindPath(TerrainMap map, MovementDomain domain, Vector2Int start, Vector2Int goal)
+        public static List<Vector2Int> FindPath(TerrainMap map, MovementDomain domain, Vector2Int start, Vector2Int goal, SimulationManager sim = null)
         {
             if (!map.IsPassable(domain, goal.x, goal.y)) return null;
             if (start == goal) return new List<Vector2Int>();
@@ -34,6 +34,7 @@ namespace RTSTemplate.Simulation
                     var next = current + offset;
                     if (cameFrom.ContainsKey(next)) continue;
                     if (!map.IsPassable(domain, next.x, next.y)) continue;
+                    if (sim != null && sim.IsCellOccupiedByUnit(next)) continue;
 
                     cameFrom[next] = current;
                     frontier.Enqueue(next);

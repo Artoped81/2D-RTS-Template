@@ -10,6 +10,16 @@ namespace RTSTemplate.Simulation
         [SerializeField] private UnitDefinition testUnitDefinition;
         [SerializeField] private int unitCount = 4;
 
+        private void OnEnable()
+        {
+            if (simulationManager != null) simulationManager.UnitSpawned += SpawnView;
+        }
+
+        private void OnDisable()
+        {
+            if (simulationManager != null) simulationManager.UnitSpawned -= SpawnView;
+        }
+
         public void SpawnInitialUnits(TerrainMap map)
         {
             if (testUnitDefinition == null) return;
@@ -25,7 +35,7 @@ namespace RTSTemplate.Simulation
                     {
                         Owner = simulationManager.PlayerFaction
                     };
-                    simulationManager.Units.Add(unit);
+                    simulationManager.RegisterUnit(unit);
                     SpawnView(unit);
                     spawned++;
                 }

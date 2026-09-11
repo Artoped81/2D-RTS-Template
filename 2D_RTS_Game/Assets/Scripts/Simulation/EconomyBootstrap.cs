@@ -17,13 +17,14 @@ namespace RTSTemplate.Simulation
         [SerializeField] private int woodNodeAmount = 500;
 
         public List<ResourceNode> ResourceNodes { get; } = new List<ResourceNode>();
+        public Building TownHall { get; private set; }
 
         public void Setup(TerrainMap map)
         {
-            var townHall = BuildingPlacer.PlaceFree(map, simulationManager.PlayerFaction, townHallDefinition, townHallOrigin);
-            townHall.CompleteImmediately();
-            simulationManager.Buildings.Add(townHall);
-            SpawnBuildingView(townHall);
+            TownHall = BuildingPlacer.PlaceFree(map, simulationManager.PlayerFaction, townHallDefinition, townHallOrigin);
+            TownHall.CompleteImmediately();
+            simulationManager.Buildings.Add(TownHall);
+            SpawnBuildingView(TownHall);
 
             var goldNode = new ResourceNode(goldNodePosition, ResourceType.Gold, goldNodeAmount);
             var woodNode = new ResourceNode(woodNodePosition, ResourceType.Wood, woodNodeAmount);

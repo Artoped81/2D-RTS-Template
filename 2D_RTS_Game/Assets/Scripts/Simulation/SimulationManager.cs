@@ -16,6 +16,10 @@ namespace RTSTemplate.Simulation
         public List<Building> Buildings { get; } = new List<Building>();
         public Faction PlayerFaction { get; private set; }
 
+        public event System.Action<Unit> UnitSpawned;
+
+        private readonly Dictionary<Vector2Int, Unit> unitOccupancy = new Dictionary<Vector2Int, Unit>();
+
         private float tickInterval;
         private float accumulator;
 
@@ -23,6 +27,21 @@ namespace RTSTemplate.Simulation
         {
             tickInterval = 1f / ticksPerSecond;
             PlayerFaction = new Faction(0);
+        }
+
+        public bool IsCellOccupiedByUnit(Vector2Int cell) => unitOccupancy.ContainsKey(cell);
+
+        public void RegisterUnit(Unit unit)
+        {
+            Units.Add(unit);
+            unitOccupancy[unit.GridPosition] = unit;
+        }
+
+        public void NotifyUnitMoved(Unit unit, Vector2Int previousCell, Vector2Int newCell)
+        {
+            if (unitOccupancy.TryGetValue(previousCell, out var occupant) && occupant == unit)
+                unitOccupancy.Remove(previousCell);
+            unitOccupancy[newCell] = unit;
         }
 
         public Building FindNearestDropOff(Faction faction, Vector2Int from)
@@ -64,12 +83,25 @@ namespace RTSTemplate.Simulation
 
             foreach (var unit in Units)
             {
-                unit.TickMove(ActiveMap, tickInterval);
-                unit.TickGather(ActiveMap, tickInterval);
+                unit.TickMove(ActiveMap, this, tickInterval);
+                unit.TickGather(ActiveMap, this, tickInterval);
             }
 
             foreach (var building in Buildings)
+            {
                 building.TickConstruction();
+
+                var producedUnit = building.TickProduction(ActiveMap, this);
+                if (producedUnit != null)
+                {
+                    RegisterUnit(producedUnit);
+                    UnitSpawned?.Invoke(producedUnit);
+                }
+
+                var completedUpgrade = building.TickResearch();
+                if (completedUpgrade != null)
+                    building.Owner.ApplyUpgrade(completedUpgrade);
+            }
         }
     }
 }

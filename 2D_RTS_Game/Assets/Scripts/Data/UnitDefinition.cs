@@ -19,5 +19,9 @@ namespace RTSTemplate.Data
         public bool CanGather;
         public int CarryCapacity = 10;
         public float GatherTimePerLoad = 2f;
+
+        [Header("Production")]
+        public ResourceCost[] Costs = new ResourceCost[0];
+        public int ProductionTimeTicks = 60;
     }
 }

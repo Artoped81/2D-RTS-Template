@@ -21,4 +21,8 @@ MonoBehaviour:
   CanGather: 1
   CarryCapacity: 10
   GatherTimePerLoad: 2
+  Costs:
+  - Type: 0
+    Amount: 20
+  ProductionTimeTicks: 40
 

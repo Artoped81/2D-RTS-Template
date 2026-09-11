@@ -1,3 +1,4 @@
+using RTSTemplate.Core;
 using UnityEngine;
 
 namespace RTSTemplate.Data
@@ -7,5 +8,9 @@ namespace RTSTemplate.Data
     {
         public string DisplayName = "New Upgrade";
         public int DurationTicks = 200;
+        public ResourceCost[] Costs = new ResourceCost[0];
+
+        [Header("Effect")]
+        public float MoveSpeedMultiplier = 1.25f;
     }
 }
