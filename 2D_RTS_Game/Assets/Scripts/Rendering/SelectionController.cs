@@ -17,6 +17,16 @@ namespace RTSTemplate.Rendering
         private bool dragging;
         private bool hasDragStart;
 
+        private void OnEnable()
+        {
+            if (simulationManager != null) simulationManager.UnitDied += HandleUnitDied;
+        }
+
+        private void OnDisable()
+        {
+            if (simulationManager != null) simulationManager.UnitDied -= HandleUnitDied;
+        }
+
         private void Update()
         {
             var mouse = Mouse.current;
@@ -46,7 +56,7 @@ namespace RTSTemplate.Rendering
             }
 
             if (mouse.rightButton.wasPressedThisFrame && selected.Count > 0)
-                IssueMoveOrder(mouse.position.ReadValue());
+                IssueOrderAt(mouse.position.ReadValue());
         }
 
         private void OnGUI()
@@ -75,6 +85,8 @@ namespace RTSTemplate.Rendering
 
             foreach (var view in FindObjectsByType<UnitView>(FindObjectsSortMode.None))
             {
+                if (view.Unit.Owner != simulationManager.PlayerFaction) continue;
+
                 var screenPos = cam.WorldToScreenPoint(view.transform.position);
                 if (screenPos.x >= min.x && screenPos.x <= max.x && screenPos.y >= min.y && screenPos.y <= max.y)
                     Select(view);
@@ -85,12 +97,20 @@ namespace RTSTemplate.Rendering
         {
             ClearSelection();
 
+            var closest = FindUnitViewAt(screenPos, requireOwnedByPlayer: true);
+            if (closest != null) Select(closest);
+        }
+
+        private UnitView FindUnitViewAt(Vector2 screenPos, bool requireOwnedByPlayer = false)
+        {
             var world = cam.ScreenToWorldPoint(screenPos);
             UnitView closest = null;
             float closestDist = clickTolerance;
 
             foreach (var view in FindObjectsByType<UnitView>(FindObjectsSortMode.None))
             {
+                if (requireOwnedByPlayer && view.Unit.Owner != simulationManager.PlayerFaction) continue;
+
                 float dist = Vector2.Distance(world, view.transform.position);
                 if (dist < closestDist)
                 {
@@ -99,21 +119,29 @@ namespace RTSTemplate.Rendering
                 }
             }
 
-            if (closest != null) Select(closest);
+            return closest;
         }
 
-        private void IssueMoveOrder(Vector2 screenPos)
+        private void IssueOrderAt(Vector2 screenPos)
         {
             if (simulationManager.ActiveMap == null) return;
+
+            var targetView = FindUnitViewAt(screenPos);
+            if (targetView != null && targetView.Unit.Owner != simulationManager.PlayerFaction)
+            {
+                foreach (var view in selected)
+                {
+                    if (view.Unit.Definition.Weapon != null)
+                        view.Unit.Attack(simulationManager, targetView.Unit);
+                }
+                return;
+            }
 
             var worldTarget = cam.ScreenToWorldPoint(screenPos);
             var targetCell = new Vector2Int(Mathf.FloorToInt(worldTarget.x), Mathf.FloorToInt(worldTarget.y));
             var targetNode = economy != null ? economy.FindNodeAt(targetCell) : null;
 
-            var centroid = Vector2.zero;
-            foreach (var view in selected) centroid += (Vector2)view.transform.position;
-            centroid /= selected.Count;
-
+            var movers = new List<UnitView>();
             foreach (var view in selected)
             {
                 if (targetNode != null && view.Unit.Definition.CanGather)
@@ -126,9 +154,31 @@ namespace RTSTemplate.Rendering
                     }
                 }
 
-                var offset = (Vector2)view.transform.position - centroid;
-                var unitTarget = targetCell + new Vector2Int(Mathf.RoundToInt(offset.x), Mathf.RoundToInt(offset.y));
-                view.Unit.MoveTo(simulationManager.ActiveMap, simulationManager, unitTarget);
+                movers.Add(view);
+            }
+
+            IssueFormationMove(movers, targetCell);
+        }
+
+        private void IssueFormationMove(List<UnitView> movers, Vector2Int targetCell)
+        {
+            int count = movers.Count;
+            if (count == 0) return;
+
+            // Re-form into a compact block around the target rather than preserving
+            // however spread out the group currently happens to be - otherwise scatter
+            // from earlier orders (or combat, gathering, etc.) only ever compounds.
+            int gridWidth = Mathf.CeilToInt(Mathf.Sqrt(count));
+
+            for (int i = 0; i < count; i++)
+            {
+                int gx = i % gridWidth - gridWidth / 2;
+                int gy = i / gridWidth - gridWidth / 2;
+                var desired = targetCell + new Vector2Int(gx, gy);
+
+                var unit = movers[i].Unit;
+                var resolved = AdjacencyUtil.FindNearestFreeCell(simulationManager.ActiveMap, unit.Definition.Domain, simulationManager, desired);
+                unit.MoveTo(simulationManager.ActiveMap, simulationManager, resolved);
             }
         }
 
@@ -142,6 +192,11 @@ namespace RTSTemplate.Rendering
         {
             foreach (var view in selected) view.SetSelected(false);
             selected.Clear();
+        }
+
+        private void HandleUnitDied(Unit unit)
+        {
+            selected.RemoveAll(view => view == null || view.Unit == unit);
         }
     }
 }

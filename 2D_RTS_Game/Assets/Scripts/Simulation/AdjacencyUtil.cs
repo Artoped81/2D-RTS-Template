@@ -45,5 +45,31 @@ namespace RTSTemplate.Simulation
 
             return best;
         }
+
+        public static Vector2Int FindNearestFreeCell(TerrainMap map, MovementDomain domain, SimulationManager sim, Vector2Int desired, int maxRadius = 5)
+        {
+            if (IsFree(map, domain, sim, desired)) return desired;
+
+            for (int radius = 1; radius <= maxRadius; radius++)
+            {
+                for (int dx = -radius; dx <= radius; dx++)
+                {
+                    for (int dy = -radius; dy <= radius; dy++)
+                    {
+                        if (Mathf.Max(Mathf.Abs(dx), Mathf.Abs(dy)) != radius) continue;
+
+                        var cell = desired + new Vector2Int(dx, dy);
+                        if (IsFree(map, domain, sim, cell)) return cell;
+                    }
+                }
+            }
+
+            return desired;
+        }
+
+        private static bool IsFree(TerrainMap map, MovementDomain domain, SimulationManager sim, Vector2Int cell)
+        {
+            return map.IsPassable(domain, cell.x, cell.y) && (sim == null || !sim.IsCellOccupiedByUnit(cell));
+        }
     }
 }

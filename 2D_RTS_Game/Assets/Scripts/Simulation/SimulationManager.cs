@@ -17,8 +17,10 @@ namespace RTSTemplate.Simulation
         public Faction PlayerFaction { get; private set; }
 
         public event System.Action<Unit> UnitSpawned;
+        public event System.Action<Unit> UnitDied;
 
         private readonly Dictionary<Vector2Int, Unit> unitOccupancy = new Dictionary<Vector2Int, Unit>();
+        private int nextFactionId = 1;
 
         private float tickInterval;
         private float accumulator;
@@ -29,12 +31,20 @@ namespace RTSTemplate.Simulation
             PlayerFaction = new Faction(0);
         }
 
+        public Faction CreateFaction() => new Faction(nextFactionId++);
+
         public bool IsCellOccupiedByUnit(Vector2Int cell) => unitOccupancy.ContainsKey(cell);
 
         public void RegisterUnit(Unit unit)
         {
             Units.Add(unit);
             unitOccupancy[unit.GridPosition] = unit;
+        }
+
+        private void UnregisterUnit(Unit unit)
+        {
+            if (unitOccupancy.TryGetValue(unit.GridPosition, out var occupant) && occupant == unit)
+                unitOccupancy.Remove(unit.GridPosition);
         }
 
         public void NotifyUnitMoved(Unit unit, Vector2Int previousCell, Vector2Int newCell)
@@ -85,6 +95,17 @@ namespace RTSTemplate.Simulation
             {
                 unit.TickMove(ActiveMap, this, tickInterval);
                 unit.TickGather(ActiveMap, this, tickInterval);
+                unit.TickCombat(ActiveMap, this);
+            }
+
+            for (int i = Units.Count - 1; i >= 0; i--)
+            {
+                var unit = Units[i];
+                if (!unit.IsDead) continue;
+
+                Units.RemoveAt(i);
+                UnregisterUnit(unit);
+                UnitDied?.Invoke(unit);
             }
 
             foreach (var building in Buildings)

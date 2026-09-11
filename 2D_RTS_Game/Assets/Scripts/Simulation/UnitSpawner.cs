@@ -7,41 +7,44 @@ namespace RTSTemplate.Simulation
     public class UnitSpawner : MonoBehaviour
     {
         [SerializeField] private SimulationManager simulationManager;
+        [SerializeField] private UnitViewRegistry viewRegistry;
         [SerializeField] private UnitDefinition testUnitDefinition;
         [SerializeField] private int unitCount = 4;
+        [SerializeField] private bool spawnAsNewFaction;
+        [SerializeField] private Vector2Int spawnAreaOrigin = Vector2Int.zero;
 
-        private void OnEnable()
-        {
-            if (simulationManager != null) simulationManager.UnitSpawned += OnUnitSpawned;
-        }
-
-        private void OnDisable()
-        {
-            if (simulationManager != null) simulationManager.UnitSpawned -= OnUnitSpawned;
-        }
+        private Faction ownFaction;
 
         public void SpawnInitialUnits(TerrainMap map)
         {
             if (testUnitDefinition == null) return;
 
+            var faction = ResolveFaction();
+
             int spawned = 0;
-            for (int y = 0; y < map.Height && spawned < unitCount; y++)
+            for (int y = spawnAreaOrigin.y; y < map.Height && spawned < unitCount; y++)
             {
-                for (int x = 0; x < map.Width && spawned < unitCount; x++)
+                for (int x = spawnAreaOrigin.x; x < map.Width && spawned < unitCount; x++)
                 {
                     if (!map.IsPassable(testUnitDefinition.Domain, x, y)) continue;
 
                     var unit = new Unit(testUnitDefinition, new Vector2Int(x, y))
                     {
-                        Owner = simulationManager.PlayerFaction
+                        Owner = faction
                     };
                     simulationManager.RegisterUnit(unit);
-                    UnitView.Spawn(unit);
+                    viewRegistry.SpawnAndTrack(unit);
                     spawned++;
                 }
             }
         }
 
-        private static void OnUnitSpawned(Unit unit) => UnitView.Spawn(unit);
+        private Faction ResolveFaction()
+        {
+            if (!spawnAsNewFaction) return simulationManager.PlayerFaction;
+
+            if (ownFaction == null) ownFaction = simulationManager.CreateFaction();
+            return ownFaction;
+        }
     }
 }

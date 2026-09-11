@@ -18,7 +18,7 @@ MonoBehaviour:
   Domain: 0
   MoveSpeed: 2
   MaxHealth: 50
-  Weapon: {fileID: 0}
+  Weapon: {fileID: 11400000, guid: 7988138208eb450f826f188cc7a253d1, type: 2}
   CanGather: 1
   CarryCapacity: 10
   GatherTimePerLoad: 2

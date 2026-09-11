@@ -9,6 +9,7 @@ namespace RTSTemplate.Rendering
         public Unit Unit { get; private set; }
 
         private SpriteRenderer spriteRenderer;
+        private bool isSelected;
         private static readonly Color SelectedTint = new Color(1f, 1f, 0.5f);
 
         public static UnitView Spawn(Unit unit)
@@ -45,12 +46,29 @@ namespace RTSTemplate.Rendering
 
         public void SetSelected(bool selected)
         {
-            spriteRenderer.color = selected ? SelectedTint : Color.white;
+            isSelected = selected;
         }
 
         private void LateUpdate()
         {
             SyncPosition();
+            UpdateTint();
+        }
+
+        private void UpdateTint()
+        {
+            if (Unit == null) return;
+
+            if (isSelected)
+            {
+                spriteRenderer.color = SelectedTint;
+                return;
+            }
+
+            float healthFraction = Unit.Definition.MaxHealth > 0
+                ? (float)Unit.CurrentHealth / Unit.Definition.MaxHealth
+                : 1f;
+            spriteRenderer.color = Color.Lerp(Color.red, Color.white, healthFraction);
         }
 
         private void SyncPosition()
