@@ -11,6 +11,19 @@ namespace RTSTemplate.Rendering
         private SpriteRenderer spriteRenderer;
         private static readonly Color SelectedTint = new Color(1f, 1f, 0.5f);
 
+        public static UnitView Spawn(Unit unit)
+        {
+            if (unit.Definition.ViewPrefab == null)
+            {
+                Debug.LogWarning($"{unit.Definition.DisplayName} has no ViewPrefab assigned.");
+                return null;
+            }
+
+            var view = Object.Instantiate(unit.Definition.ViewPrefab).GetComponent<UnitView>();
+            view.Bind(unit);
+            return view;
+        }
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
@@ -19,9 +32,14 @@ namespace RTSTemplate.Rendering
         public void Bind(Unit unit)
         {
             Unit = unit;
-            spriteRenderer.sprite = unit.Definition.PlaceholderSprite != null
-                ? unit.Definition.PlaceholderSprite
-                : UnitPlaceholderSprite.Get();
+
+            if (spriteRenderer.sprite == null)
+            {
+                spriteRenderer.sprite = unit.Definition.PlaceholderSprite != null
+                    ? unit.Definition.PlaceholderSprite
+                    : UnitPlaceholderSprite.Get();
+            }
+
             SyncPosition();
         }
 

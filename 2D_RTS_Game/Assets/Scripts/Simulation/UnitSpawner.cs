@@ -12,12 +12,12 @@ namespace RTSTemplate.Simulation
 
         private void OnEnable()
         {
-            if (simulationManager != null) simulationManager.UnitSpawned += SpawnView;
+            if (simulationManager != null) simulationManager.UnitSpawned += OnUnitSpawned;
         }
 
         private void OnDisable()
         {
-            if (simulationManager != null) simulationManager.UnitSpawned -= SpawnView;
+            if (simulationManager != null) simulationManager.UnitSpawned -= OnUnitSpawned;
         }
 
         public void SpawnInitialUnits(TerrainMap map)
@@ -36,18 +36,12 @@ namespace RTSTemplate.Simulation
                         Owner = simulationManager.PlayerFaction
                     };
                     simulationManager.RegisterUnit(unit);
-                    SpawnView(unit);
+                    UnitView.Spawn(unit);
                     spawned++;
                 }
             }
         }
 
-        private static void SpawnView(Unit unit)
-        {
-            var go = new GameObject(unit.Definition.DisplayName);
-            go.AddComponent<SpriteRenderer>();
-            var view = go.AddComponent<UnitView>();
-            view.Bind(unit);
-        }
+        private static void OnUnitSpawned(Unit unit) => UnitView.Spawn(unit);
     }
 }

@@ -11,9 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 096cfb7c291c79b4ab06d7e0b5ee3905, type: 3}
   m_Name: PlaceholderHut
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   DisplayName: Hut
   PlaceholderSprite: {fileID: 0}
+  ViewPrefab: {fileID: 6751116673659285078, guid: 56a30da3fab083042a43b70b44239aa1, type: 3}
   Domain: 0
   FootprintSize: {x: 1, y: 1}
   MaxHealth: 100

@@ -8,6 +8,7 @@ namespace RTSTemplate.Data
     {
         public string DisplayName = "New Unit";
         public Sprite PlaceholderSprite;
+        public GameObject ViewPrefab;
 
         public MovementDomain Domain = MovementDomain.Land;
         public float MoveSpeed = 2f;

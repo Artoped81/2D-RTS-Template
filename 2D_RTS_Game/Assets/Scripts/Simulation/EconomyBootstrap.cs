@@ -13,8 +13,10 @@ namespace RTSTemplate.Simulation
         [SerializeField] private Vector2Int townHallOrigin = new Vector2Int(2, 2);
         [SerializeField] private Vector2Int goldNodePosition = new Vector2Int(2, 6);
         [SerializeField] private int goldNodeAmount = 500;
+        [SerializeField] private GameObject goldNodeViewPrefab;
         [SerializeField] private Vector2Int woodNodePosition = new Vector2Int(16, 2);
         [SerializeField] private int woodNodeAmount = 500;
+        [SerializeField] private GameObject woodNodeViewPrefab;
 
         public List<ResourceNode> ResourceNodes { get; } = new List<ResourceNode>();
         public Building TownHall { get; private set; }
@@ -24,14 +26,14 @@ namespace RTSTemplate.Simulation
             TownHall = BuildingPlacer.PlaceFree(map, simulationManager.PlayerFaction, townHallDefinition, townHallOrigin);
             TownHall.CompleteImmediately();
             simulationManager.Buildings.Add(TownHall);
-            SpawnBuildingView(TownHall);
+            BuildingView.Spawn(TownHall);
 
             var goldNode = new ResourceNode(goldNodePosition, ResourceType.Gold, goldNodeAmount);
             var woodNode = new ResourceNode(woodNodePosition, ResourceType.Wood, woodNodeAmount);
             ResourceNodes.Add(goldNode);
             ResourceNodes.Add(woodNode);
-            SpawnResourceNodeView(goldNode);
-            SpawnResourceNodeView(woodNode);
+            ResourceNodeView.Spawn(goldNode, goldNodeViewPrefab);
+            ResourceNodeView.Spawn(woodNode, woodNodeViewPrefab);
         }
 
         public ResourceNode FindNodeAt(Vector2Int cell)
@@ -40,20 +42,6 @@ namespace RTSTemplate.Simulation
                 if (node.Position == cell)
                     return node;
             return null;
-        }
-
-        private static void SpawnBuildingView(Building building)
-        {
-            var go = new GameObject(building.Definition.DisplayName);
-            go.AddComponent<SpriteRenderer>();
-            go.AddComponent<BuildingView>().Bind(building);
-        }
-
-        private static void SpawnResourceNodeView(ResourceNode node)
-        {
-            var go = new GameObject(node.Type + " Node");
-            go.AddComponent<SpriteRenderer>();
-            go.AddComponent<ResourceNodeView>().Bind(node);
         }
     }
 }

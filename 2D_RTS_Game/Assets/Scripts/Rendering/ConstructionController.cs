@@ -42,16 +42,9 @@ namespace RTSTemplate.Rendering
             if (BuildingPlacer.TryPlacePaid(simulationManager.ActiveMap, simulationManager.PlayerFaction, buildableDefinition, origin, out var building))
             {
                 simulationManager.Buildings.Add(building);
-                SpawnView(building);
+                BuildingView.Spawn(building);
                 placing = false;
             }
-        }
-
-        private static void SpawnView(Building building)
-        {
-            var go = new GameObject(building.Definition.DisplayName);
-            go.AddComponent<SpriteRenderer>();
-            go.AddComponent<BuildingView>().Bind(building);
         }
     }
 }

@@ -10,6 +10,19 @@ namespace RTSTemplate.Rendering
 
         private SpriteRenderer spriteRenderer;
 
+        public static BuildingView Spawn(Building building)
+        {
+            if (building.Definition.ViewPrefab == null)
+            {
+                Debug.LogWarning($"{building.Definition.DisplayName} has no ViewPrefab assigned.");
+                return null;
+            }
+
+            var view = Object.Instantiate(building.Definition.ViewPrefab).GetComponent<BuildingView>();
+            view.Bind(building);
+            return view;
+        }
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
@@ -18,9 +31,13 @@ namespace RTSTemplate.Rendering
         public void Bind(Building building)
         {
             Building = building;
-            spriteRenderer.sprite = building.Definition.PlaceholderSprite != null
-                ? building.Definition.PlaceholderSprite
-                : BuildingPlaceholderSprite.Get();
+
+            if (spriteRenderer.sprite == null)
+            {
+                spriteRenderer.sprite = building.Definition.PlaceholderSprite != null
+                    ? building.Definition.PlaceholderSprite
+                    : BuildingPlaceholderSprite.Get();
+            }
 
             var footprint = building.Definition.FootprintSize;
             transform.localScale = new Vector3(footprint.x, footprint.y, 1f);

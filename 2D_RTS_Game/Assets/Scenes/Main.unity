@@ -924,8 +924,10 @@ MonoBehaviour:
   townHallOrigin: {x: 2, y: 2}
   goldNodePosition: {x: 2, y: 6}
   goldNodeAmount: 500
+  goldNodeViewPrefab: {fileID: 813859406558453203, guid: 160a75f71c0e61343870c02b9f875cfe, type: 3}
   woodNodePosition: {x: 16, y: 2}
   woodNodeAmount: 500
+  woodNodeViewPrefab: {fileID: 1125615591172614326, guid: dc38b3685548c16438b8a9506cfaa79e, type: 3}
 --- !u!1 &1545919477
 GameObject:
   m_ObjectHideFlags: 0

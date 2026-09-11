@@ -8,6 +8,7 @@ namespace RTSTemplate.Data
     {
         public string DisplayName = "New Building";
         public Sprite PlaceholderSprite;
+        public GameObject ViewPrefab;
 
         public MovementDomain Domain = MovementDomain.Land;
         public Vector2Int FootprintSize = Vector2Int.one;
